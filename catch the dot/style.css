@@ -21,4 +21,20 @@ body {
     position: absolute;
     cursor: pointer;
   }
+  .dot {
+    /* already exists – just add these */
+    transition: transform 0.2s ease;
+    animation: pop-in 0.2s ease-out;
+  }
+  
+  @keyframes pop-in {
+    from {
+      transform: scale(0.2);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
   
