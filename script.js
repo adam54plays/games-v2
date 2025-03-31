@@ -1,54 +1,36 @@
 const gameArea = document.getElementById("gameArea");
 const scoreDisplay = document.getElementById("score");
-const highScoreDisplay = document.getElementById("highScore");
 const timerDisplay = document.getElementById("timer");
 const restartButton = document.getElementById("restartButton");
-const pauseButton = document.getElementById("pauseButton");
-const themeToggle = document.getElementById("themeToggle");
-
-const popSound = document.getElementById("popSound");
-const gameOverSound = document.getElementById("gameOverSound");
 
 let score = 0;
-let highScore = localStorage.getItem("highScore") || 0;
 let timeLeft = 30;
 let gameActive = true;
-let paused = false;
 let timerInterval;
 
-highScoreDisplay.textContent = highScore;
-
 function spawnDot() {
-  if (!gameActive || paused) return;
+  if (!gameActive) return;
 
   const dot = document.createElement("div");
   dot.classList.add("dot");
 
+  // Dot size gets smaller as score increases
   const size = Math.max(30 - score * 0.5, 10);
   dot.style.width = `${size}px`;
   dot.style.height = `${size}px`;
 
+  // Random position within game area bounds
   const x = Math.random() * (gameArea.clientWidth - size);
   const y = Math.random() * (gameArea.clientHeight - size);
 
   dot.style.left = `${x}px`;
   dot.style.top = `${y}px`;
 
+  // On click: increase score, remove dot, spawn next
   dot.onclick = () => {
     score++;
     scoreDisplay.textContent = score;
-
-    if (score > highScore) {
-      highScore = score;
-      localStorage.setItem("highScore", highScore);
-      highScoreDisplay.textContent = highScore;
-    }
-
-    dot.classList.add("explode");
-    popSound.currentTime = 0;
-    popSound.play();
-
-    setTimeout(() => dot.remove(), 250);
+    dot.remove();
 
     const delay = Math.max(200 - score * 5, 80);
     setTimeout(spawnDot, delay);
@@ -59,16 +41,14 @@ function spawnDot() {
 
 function startTimer() {
   timerInterval = setInterval(() => {
-    if (!gameActive || paused) return;
-
     timeLeft--;
     timerDisplay.textContent = timeLeft;
 
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
       gameActive = false;
-      gameOverSound.play();
       gameArea.innerHTML = "<h2>Game Over!</h2><p>Your score: " + score + "</p>";
+      restartButton.style.display = "block";
     }
   }, 1000);
 }
@@ -77,28 +57,17 @@ function startGame() {
   score = 0;
   timeLeft = 30;
   gameActive = true;
-  paused = false;
-
   scoreDisplay.textContent = score;
   timerDisplay.textContent = timeLeft;
   gameArea.innerHTML = "";
+  restartButton.style.display = "none";
 
-  clearInterval(timerInterval);
   spawnDot();
   startTimer();
 }
 
+// Restart button click restarts game
 restartButton.onclick = startGame;
 
-pauseButton.onclick = () => {
-  paused = !paused;
-  pauseButton.textContent = paused ? "Resume" : "Pause";
-
-  if (!paused) {
-    spawnDot();
-  }
-};
-
-themeToggle.onclick = () => {
-  document.body.classList.toggle("dark-mode");
-};
+// Start the game when the page loads
+startGame();
