@@ -5,7 +5,6 @@ const timerDisplay = document.getElementById("timer");
 const restartButton = document.getElementById("restartButton");
 const pauseButton = document.getElementById("pauseButton");
 const themeToggle = document.getElementById("themeToggle");
-
 const popSound = document.getElementById("popSound");
 const gameOverSound = document.getElementById("gameOverSound");
 
@@ -47,7 +46,6 @@ function spawnDot() {
     dot.classList.add("explode");
     popSound.currentTime = 0;
     popSound.play();
-
     setTimeout(() => dot.remove(), 250);
 
     const delay = Math.max(200 - score * 5, 80);
@@ -60,7 +58,6 @@ function spawnDot() {
 function startTimer() {
   timerInterval = setInterval(() => {
     if (!gameActive || paused) return;
-
     timeLeft--;
     timerDisplay.textContent = timeLeft;
 
@@ -82,6 +79,7 @@ function startGame() {
   scoreDisplay.textContent = score;
   timerDisplay.textContent = timeLeft;
   gameArea.innerHTML = "";
+  restartButton.style.display = "none";
 
   clearInterval(timerInterval);
   spawnDot();
@@ -93,12 +91,11 @@ restartButton.onclick = startGame;
 pauseButton.onclick = () => {
   paused = !paused;
   pauseButton.textContent = paused ? "Resume" : "Pause";
-
-  if (!paused) {
-    spawnDot();
-  }
+  if (!paused) spawnDot();
 };
 
 themeToggle.onclick = () => {
   document.body.classList.toggle("dark-mode");
 };
+
+startGame();

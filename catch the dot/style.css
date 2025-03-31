@@ -10,6 +10,10 @@ body {
     color: white;
   }
   
+  .dark-mode #gameArea {
+    background: #333;
+  }
+  
   #gameArea {
     width: 600px;
     height: 400px;
@@ -20,10 +24,6 @@ body {
     overflow: hidden;
   }
   
-  .dark-mode #gameArea {
-    background: #333;
-  }
-  
   .dot {
     background-color: red;
     border-radius: 50%;
@@ -31,6 +31,8 @@ body {
     cursor: pointer;
     transition: transform 0.2s ease;
     animation: pop-in 0.2s ease-out;
+    width: 30px;
+    height: 30px;
   }
   
   .explode {
