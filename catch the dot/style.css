@@ -11,18 +11,14 @@ body {
     border: 2px solid #333;
     position: relative;
     background: #fff;
+    overflow: hidden;
   }
   
   .dot {
-    width: 30px;
-    height: 30px;
     background-color: red;
     border-radius: 50%;
     position: absolute;
     cursor: pointer;
-  }
-  .dot {
-    /* already exists – just add these */
     transition: transform 0.2s ease;
     animation: pop-in 0.2s ease-out;
   }
@@ -36,5 +32,12 @@ body {
       transform: scale(1);
       opacity: 1;
     }
+  }
+  
+  #restartButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
   }
   
