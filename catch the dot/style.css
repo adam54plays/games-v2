@@ -21,7 +21,10 @@ body {
     cursor: pointer;
     transition: transform 0.2s ease;
     animation: pop-in 0.2s ease-out;
+    width: 30px;       /* <-- important: default width */
+    height: 30px;      /* <-- important: default height */
   }
+  
   
   @keyframes pop-in {
     from {

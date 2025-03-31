@@ -53,3 +53,4 @@ function startTimer() {
 
 spawnDot();
 startTimer();
+startGame();
