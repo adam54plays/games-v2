@@ -4,7 +4,14 @@ const highScoreDisplay = document.getElementById("highScore");
 const timerDisplay = document.getElementById("timer");
 const comboDisplay = document.getElementById("combo");
 const multiplierDisplay = document.getElementById("multiplier");
+
 const restartButton = document.getElementById("restartButton");
+const themeToggle = document.getElementById("themeToggle");
+const soundToggle = document.getElementById("soundToggle");
+const musicToggle = document.getElementById("musicToggle");
+
+const bgMusic = document.getElementById("bgMusic");
+const clickSound = document.getElementById("clickSound");
 
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
@@ -19,8 +26,17 @@ let dotSpawner;
 let doubleScore = false;
 let totalClicks = 0;
 let successfulClicks = 0;
+let soundOn = true;
+let musicOn = false;
 
 highScoreDisplay.textContent = highScore;
+
+function playSound(audio) {
+  if (soundOn) {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
 
 function spawnDot(forceSafe = false) {
   if (!gameActive) return;
@@ -54,6 +70,7 @@ function spawnDot(forceSafe = false) {
     }
 
     successfulClicks++;
+    playSound(clickSound);
 
     if (type === "green") {
       timeLeft += 3;
@@ -77,7 +94,6 @@ function spawnDot(forceSafe = false) {
         combo = 1;
       }
       lastClickTime = now;
-
       if (combo > bestCombo) bestCombo = combo;
 
       multiplier = 1 + Math.floor(combo / 5);
@@ -97,7 +113,7 @@ function spawnDot(forceSafe = false) {
     dot.remove();
   };
 
-  // Floating logic
+  // Floating motion
   let vx = (Math.random() - 0.5) * 2;
   let vy = (Math.random() - 0.5) * 2;
   const moveInterval = setInterval(() => {
@@ -122,19 +138,14 @@ function ensureSafeDot() {
   const hasSafe = [...gameArea.children].some(dot =>
     !dot.classList.contains("black")
   );
-  if (!hasSafe) {
-    spawnDot(true);
-  }
+  if (!hasSafe) spawnDot(true);
 }
 
 function startTimer() {
   timerInterval = setInterval(() => {
     timeLeft--;
     timerDisplay.textContent = timeLeft;
-
-    if (timeLeft <= 0) {
-      endGame("⏳ Time's up!");
-    }
+    if (timeLeft <= 0) endGame("⏳ Time's up!");
   }, 1000);
 }
 
@@ -149,15 +160,14 @@ function updateLeaderboard(name, score) {
   const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
   board.push({ name, score });
   board.sort((a, b) => b.score - a.score);
-  const top5 = board.slice(0, 5);
-  localStorage.setItem("leaderboard", JSON.stringify(top5));
+  localStorage.setItem("leaderboard", JSON.stringify(board.slice(0, 5)));
 }
 
 function renderLeaderboardHTML() {
   const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
   return `
     <h3>Top 5 Scores</h3>
-    <ol>${board.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join("")}</ol>
+    <ol>${board.map(e => `<li>${e.name}: ${e.score}</li>`).join("")}</ol>
   `;
 }
 
@@ -203,5 +213,28 @@ function startGame() {
   startDotSpawning();
 }
 
+// Toggles
 restartButton.onclick = startGame;
+
+themeToggle.onclick = () => {
+  document.body.classList.toggle("dark-mode");
+};
+
+soundToggle.onclick = () => {
+  soundOn = !soundOn;
+  soundToggle.textContent = soundOn ? "🔊 Sound" : "🔇 Sound";
+};
+
+musicToggle.onclick = () => {
+  musicOn = !musicOn;
+  if (musicOn) {
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    musicToggle.textContent = "🎵 Music";
+  } else {
+    bgMusic.pause();
+    musicToggle.textContent = "🚫 Music";
+  }
+};
+
 startGame();
