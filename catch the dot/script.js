@@ -15,6 +15,7 @@ let lastClickTime = null;
 let gameActive = false;
 let timerInterval;
 let doubleScore = false;
+let lastWasBomb = false;
 
 highScoreDisplay.textContent = highScore;
 
@@ -24,11 +25,15 @@ function spawnDot() {
   const dot = document.createElement("div");
   dot.classList.add("dot");
 
-  const types = ["red", "red", "red", "black", "green", "blue", "yellow"];
-  const type = types[Math.floor(Math.random() * types.length)];
+  const safeTypes = ["red", "green", "blue", "yellow"];
+  const allTypes = ["red", "red", "red", "black", "green", "blue", "yellow"];
+  const type = lastWasBomb
+    ? safeTypes[Math.floor(Math.random() * safeTypes.length)]
+    : allTypes[Math.floor(Math.random() * allTypes.length)];
+
+  lastWasBomb = (type === "black");
   dot.classList.add(type);
 
-  // Fixed size assignment
   let size = 30;
   if (type === "green" || type === "blue") size = 25;
   if (type === "yellow") size = 40;
@@ -115,6 +120,7 @@ function startGame() {
   lastClickTime = null;
   doubleScore = false;
   gameActive = true;
+  lastWasBomb = false;
 
   scoreDisplay.textContent = score;
   timerDisplay.textContent = timeLeft;
