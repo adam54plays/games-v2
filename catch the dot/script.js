@@ -10,12 +10,15 @@ let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 let timeLeft = 30;
 let combo = 0;
+let bestCombo = 0;
 let multiplier = 1;
 let lastClickTime = null;
 let gameActive = false;
 let timerInterval;
 let dotSpawner;
 let doubleScore = false;
+let totalClicks = 0;
+let successfulClicks = 0;
 
 highScoreDisplay.textContent = highScore;
 
@@ -39,15 +42,18 @@ function spawnDot(forceSafe = false) {
 
   let x = Math.random() * (gameArea.clientWidth - size);
   let y = Math.random() * (gameArea.clientHeight - size);
-
   dot.style.left = `${x}px`;
   dot.style.top = `${y}px`;
 
   dot.onclick = () => {
+    totalClicks++;
+
     if (type === "black") {
       endGame("💣 You hit a bomb!");
       return;
     }
+
+    successfulClicks++;
 
     if (type === "green") {
       timeLeft += 3;
@@ -72,6 +78,8 @@ function spawnDot(forceSafe = false) {
       }
       lastClickTime = now;
 
+      if (combo > bestCombo) bestCombo = combo;
+
       multiplier = 1 + Math.floor(combo / 5);
       score += (doubleScore ? 2 : 1) * multiplier;
 
@@ -89,7 +97,7 @@ function spawnDot(forceSafe = false) {
     dot.remove();
   };
 
-  // Move the dot gently every 50ms
+  // Floating logic
   let vx = (Math.random() - 0.5) * 2;
   let vy = (Math.random() - 0.5) * 2;
   const moveInterval = setInterval(() => {
@@ -97,11 +105,9 @@ function spawnDot(forceSafe = false) {
       clearInterval(moveInterval);
       return;
     }
-
     x += vx;
     y += vy;
 
-    // Bounce off walls
     if (x <= 0 || x >= gameArea.clientWidth - size) vx *= -1;
     if (y <= 0 || y >= gameArea.clientHeight - size) vy *= -1;
 
@@ -139,11 +145,38 @@ function startDotSpawning() {
   }, 800);
 }
 
+function updateLeaderboard(name, score) {
+  const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  board.push({ name, score });
+  board.sort((a, b) => b.score - a.score);
+  const top5 = board.slice(0, 5);
+  localStorage.setItem("leaderboard", JSON.stringify(top5));
+}
+
+function renderLeaderboardHTML() {
+  const board = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+  return `
+    <h3>Top 5 Scores</h3>
+    <ol>${board.map(entry => `<li>${entry.name}: ${entry.score}</li>`).join("")}</ol>
+  `;
+}
+
 function endGame(message) {
   clearInterval(timerInterval);
   clearInterval(dotSpawner);
   gameActive = false;
-  gameArea.innerHTML = `<h2>Game Over</h2><p>${message}</p><p>Score: ${score}</p>`;
+
+  const accuracy = totalClicks ? Math.round((successfulClicks / totalClicks) * 100) : 0;
+  const name = prompt("Game Over! Enter your name for the leaderboard:", "Player") || "Player";
+  updateLeaderboard(name, score);
+
+  gameArea.innerHTML = `
+    <h2>${message}</h2>
+    <p>Final Score: ${score}</p>
+    <p>Best Combo: ${bestCombo}</p>
+    <p>Accuracy: ${accuracy}% (${successfulClicks}/${totalClicks})</p>
+    ${renderLeaderboardHTML()}
+  `;
   restartButton.style.display = "block";
 }
 
@@ -151,9 +184,12 @@ function startGame() {
   score = 0;
   timeLeft = 30;
   combo = 0;
+  bestCombo = 0;
   multiplier = 1;
   lastClickTime = null;
   doubleScore = false;
+  totalClicks = 0;
+  successfulClicks = 0;
   gameActive = true;
 
   scoreDisplay.textContent = score;
