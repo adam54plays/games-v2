@@ -9,11 +9,12 @@ const restartButton = document.getElementById("restartButton");
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
 let timeLeft = 30;
-let timerInterval;
 let combo = 0;
 let multiplier = 1;
 let lastClickTime = null;
 let gameActive = false;
+let timerInterval;
+let doubleScore = false;
 
 highScoreDisplay.textContent = highScore;
 
@@ -23,10 +24,12 @@ function spawnDot() {
   const dot = document.createElement("div");
   dot.classList.add("dot");
 
-  const size = 30;
-  dot.style.width = `${size}px`;
-  dot.style.height = `${size}px`;
+  // Pick random dot type
+  const types = ["red", "red", "red", "black", "green", "blue", "yellow"];
+  const type = types[Math.floor(Math.random() * types.length)];
+  dot.classList.add(type);
 
+  const size = parseInt(window.getComputedStyle(dot).width);
   const x = Math.random() * (gameArea.clientWidth - size);
   const y = Math.random() * (gameArea.clientHeight - size);
 
@@ -34,24 +37,42 @@ function spawnDot() {
   dot.style.top = `${y}px`;
 
   dot.onclick = () => {
-    const now = Date.now();
-
-    // Combo timing logic
-    if (lastClickTime && now - lastClickTime <= 2000) {
-      combo++;
-    } else {
-      combo = 1;
+    if (type === "black") {
+      endGame("💣 You hit a bomb!");
+      return;
     }
-    lastClickTime = now;
 
-    multiplier = 1 + Math.floor(combo / 5);
-    score += 1 * multiplier;
+    if (type === "green") {
+      timeLeft += 3;
+      timerDisplay.textContent = timeLeft;
+    }
 
-    // Update UI
+    if (type === "blue") {
+      doubleScore = true;
+      setTimeout(() => doubleScore = false, 10000);
+    }
+
+    if (type === "yellow") {
+      score += 10;
+    }
+
+    if (type === "red") {
+      const now = Date.now();
+      if (lastClickTime && now - lastClickTime <= 2000) {
+        combo++;
+      } else {
+        combo = 1;
+      }
+      lastClickTime = now;
+
+      multiplier = 1 + Math.floor(combo / 5);
+      score += (doubleScore ? 2 : 1) * multiplier;
+
+      comboDisplay.textContent = combo;
+      multiplierDisplay.textContent = multiplier;
+    }
+
     scoreDisplay.textContent = score;
-    comboDisplay.textContent = combo;
-    multiplierDisplay.textContent = multiplier;
-
     if (score > highScore) {
       highScore = score;
       localStorage.setItem("highScore", highScore);
@@ -63,16 +84,6 @@ function spawnDot() {
   };
 
   gameArea.appendChild(dot);
-
-  // Reset combo if not clicked in 2 seconds
-  setTimeout(() => {
-    if (Date.now() - lastClickTime > 2000) {
-      combo = 0;
-      multiplier = 1;
-      comboDisplay.textContent = combo;
-      multiplierDisplay.textContent = multiplier;
-    }
-  }, 2100);
 }
 
 function startTimer() {
@@ -81,12 +92,16 @@ function startTimer() {
     timerDisplay.textContent = timeLeft;
 
     if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      gameActive = false;
-      gameArea.innerHTML = "<h2>Game Over!</h2><p>Your score: " + score + "</p>";
-      restartButton.style.display = "block";
+      endGame("⏳ Time's up!");
     }
   }, 1000);
+}
+
+function endGame(message) {
+  clearInterval(timerInterval);
+  gameActive = false;
+  gameArea.innerHTML = `<h2>Game Over</h2><p>${message}</p><p>Score: ${score}</p>`;
+  restartButton.style.display = "block";
 }
 
 function startGame() {
@@ -95,6 +110,7 @@ function startGame() {
   combo = 0;
   multiplier = 1;
   lastClickTime = null;
+  doubleScore = false;
   gameActive = true;
 
   scoreDisplay.textContent = score;
