@@ -37,8 +37,8 @@ function spawnDot(forceSafe = false) {
   if (type === "green" || type === "blue") size = 25;
   if (type === "yellow") size = 40;
 
-  const x = Math.random() * (gameArea.clientWidth - size);
-  const y = Math.random() * (gameArea.clientHeight - size);
+  let x = Math.random() * (gameArea.clientWidth - size);
+  let y = Math.random() * (gameArea.clientHeight - size);
 
   dot.style.left = `${x}px`;
   dot.style.top = `${y}px`;
@@ -88,6 +88,26 @@ function spawnDot(forceSafe = false) {
 
     dot.remove();
   };
+
+  // Move the dot gently every 50ms
+  let vx = (Math.random() - 0.5) * 2;
+  let vy = (Math.random() - 0.5) * 2;
+  const moveInterval = setInterval(() => {
+    if (!gameActive || !dot.parentElement) {
+      clearInterval(moveInterval);
+      return;
+    }
+
+    x += vx;
+    y += vy;
+
+    // Bounce off walls
+    if (x <= 0 || x >= gameArea.clientWidth - size) vx *= -1;
+    if (y <= 0 || y >= gameArea.clientHeight - size) vy *= -1;
+
+    dot.style.left = `${x}px`;
+    dot.style.top = `${y}px`;
+  }, 50);
 
   gameArea.appendChild(dot);
 }
