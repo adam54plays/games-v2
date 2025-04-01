@@ -24,12 +24,15 @@ function spawnDot() {
   const dot = document.createElement("div");
   dot.classList.add("dot");
 
-  // Pick random dot type
   const types = ["red", "red", "red", "black", "green", "blue", "yellow"];
   const type = types[Math.floor(Math.random() * types.length)];
   dot.classList.add(type);
 
-  const size = parseInt(window.getComputedStyle(dot).width);
+  // Fixed size assignment
+  let size = 30;
+  if (type === "green" || type === "blue") size = 25;
+  if (type === "yellow") size = 40;
+
   const x = Math.random() * (gameArea.clientWidth - size);
   const y = Math.random() * (gameArea.clientHeight - size);
 
