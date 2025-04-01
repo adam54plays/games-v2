@@ -14,12 +14,12 @@ let multiplier = 1;
 let lastClickTime = null;
 let gameActive = false;
 let timerInterval;
+let dotSpawner;
 let doubleScore = false;
-let lastWasBomb = false;
 
 highScoreDisplay.textContent = highScore;
 
-function spawnDot() {
+function spawnDot(forceSafe = false) {
   if (!gameActive) return;
 
   const dot = document.createElement("div");
@@ -27,11 +27,10 @@ function spawnDot() {
 
   const safeTypes = ["red", "green", "blue", "yellow"];
   const allTypes = ["red", "red", "red", "black", "green", "blue", "yellow"];
-  const type = lastWasBomb
+  const type = forceSafe
     ? safeTypes[Math.floor(Math.random() * safeTypes.length)]
     : allTypes[Math.floor(Math.random() * allTypes.length)];
 
-  lastWasBomb = (type === "black");
   dot.classList.add(type);
 
   let size = 30;
@@ -88,10 +87,18 @@ function spawnDot() {
     }
 
     dot.remove();
-    setTimeout(spawnDot, 300);
   };
 
   gameArea.appendChild(dot);
+}
+
+function ensureSafeDot() {
+  const hasSafe = [...gameArea.children].some(dot =>
+    !dot.classList.contains("black")
+  );
+  if (!hasSafe) {
+    spawnDot(true);
+  }
 }
 
 function startTimer() {
@@ -105,8 +112,16 @@ function startTimer() {
   }, 1000);
 }
 
+function startDotSpawning() {
+  dotSpawner = setInterval(() => {
+    spawnDot();
+    ensureSafeDot();
+  }, 800);
+}
+
 function endGame(message) {
   clearInterval(timerInterval);
+  clearInterval(dotSpawner);
   gameActive = false;
   gameArea.innerHTML = `<h2>Game Over</h2><p>${message}</p><p>Score: ${score}</p>`;
   restartButton.style.display = "block";
@@ -120,7 +135,6 @@ function startGame() {
   lastClickTime = null;
   doubleScore = false;
   gameActive = true;
-  lastWasBomb = false;
 
   scoreDisplay.textContent = score;
   timerDisplay.textContent = timeLeft;
@@ -129,8 +143,8 @@ function startGame() {
   gameArea.innerHTML = "";
   restartButton.style.display = "none";
 
-  spawnDot();
   startTimer();
+  startDotSpawning();
 }
 
 restartButton.onclick = startGame;
