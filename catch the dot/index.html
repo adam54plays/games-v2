@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catch the Dot - Power-Up Edition</title>
+  <title>Catch the Dot - Ultimate Edition</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -14,10 +14,19 @@
     Time Left: <span id="timer">30</span>s |
     Combo: <span id="combo">0</span> (x<span id="multiplier">1</span>)
   </p>
-  <div id="gameArea"></div>
+
   <div class="buttons">
-    <button id="restartButton">Restart Game</button>
+    <button id="restartButton">Restart</button>
+    <button id="themeToggle">🌙 Theme</button>
+    <button id="soundToggle">🔊 Sound</button>
+    <button id="musicToggle">🎵 Music</button>
   </div>
+
+  <div id="gameArea"></div>
+
+  <audio id="bgMusic" src="https://freesound.org/data/previews/490/490466_10204177-lq.mp3" loop></audio>
+  <audio id="clickSound" src="https://freesound.org/data/previews/522/522293_11670103-lq.mp3"></audio>
+
   <script src="script.js"></script>
 </body>
 </html>
